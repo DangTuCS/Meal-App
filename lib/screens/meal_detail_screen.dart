@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import '../dummy_data.dart';
 
 class MealDetailScreen extends StatelessWidget {
-  const MealDetailScreen({Key? key}) : super(key: key);
+  final Function toggleFavorite;
+  final Function isFavorite;
   static const routeName = '/meal-detail';
+
+  MealDetailScreen(this.toggleFavorite, this.isFavorite);
 
   Widget buildSectionTitle(BuildContext context, String text) {
     return Container(
@@ -36,58 +39,84 @@ class MealDetailScreen extends StatelessWidget {
     final mealId = ModalRoute.of(context)?.settings.arguments as String;
     final selectedMeal = DUMMY_MEALS.firstWhere((meal) => meal.id == mealId);
     return Scaffold(
-        appBar: AppBar(
-          title: Text(selectedMeal.title),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 300,
-                width: double.infinity,
-                child: Image.network(
-                  selectedMeal.imageUrl,
-                  fit: BoxFit.cover,
-                ),
+      appBar: AppBar(
+        title: Text(selectedMeal.title),
+        actions: [
+          isFavorite(mealId)
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.favorite,
+                    color: Colors.amber,
+                  ),
+                  tooltip: 'Remove favorite',
+                  onPressed: () => toggleFavorite(mealId),
+                )
+              : IconButton(
+                  icon: const Icon(
+                    Icons.favorite,
+                    color: Colors.white,
+                  ),
+                  tooltip: 'Add favorite',
+                  onPressed: () => toggleFavorite(mealId),
+                )
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 300,
+              width: double.infinity,
+              child: Image.network(
+                selectedMeal.imageUrl,
+                fit: BoxFit.cover,
               ),
-              buildSectionTitle(context, 'Ingredients'),
-              buildContainer(
-                ListView.builder(
-                  itemBuilder: (context, index) => Card(
-                    color: Theme.of(context).colorScheme.secondary,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 5,
-                        horizontal: 10,
-                      ),
-                      child: Text(
-                        selectedMeal.ingredients[index],
-                      ),
+            ),
+            buildSectionTitle(context, 'Ingredients'),
+            buildContainer(
+              ListView.builder(
+                itemBuilder: (context, index) => Card(
+                  color: Theme.of(context).colorScheme.secondary,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 5,
+                      horizontal: 10,
+                    ),
+                    child: Text(
+                      selectedMeal.ingredients[index],
                     ),
                   ),
-                  itemCount: selectedMeal.ingredients.length,
                 ),
+                itemCount: selectedMeal.ingredients.length,
               ),
-              buildSectionTitle(context, 'Steps'),
-              buildContainer(ListView.builder(
-                itemBuilder: (context, index) => Column(
-                  children: [
-                    ListTile(
-                      leading: CircleAvatar(
-                        child: Text('# ${(index + 1)}'),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                      ),
-                      title: Text(
-                        selectedMeal.steps[index],
-                      ),
+            ),
+            buildSectionTitle(context, 'Steps'),
+            buildContainer(ListView.builder(
+              itemBuilder: (context, index) => Column(
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      child: Text('# ${(index + 1)}'),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
-                    const Divider(),
-                  ],
-                ),
-                itemCount: selectedMeal.steps.length,
-              ))
-            ],
-          ),
-        ));
+                    title: Text(
+                      selectedMeal.steps[index],
+                    ),
+                  ),
+                  const Divider(),
+                ],
+              ),
+              itemCount: selectedMeal.steps.length,
+            ))
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.delete),
+        onPressed: () {
+          Navigator.of(context).pop(mealId);
+        },
+      ),
+    );
   }
 }
